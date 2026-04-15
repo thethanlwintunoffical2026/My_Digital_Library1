@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+body {
+    background: #000;
+    margin: 0;
+    overflow-x: hidden;
+    color: #0f0;
+    font-family: sans-serif;
+}
+
+#matrix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 50px 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+/* ခေါင်းစဉ်ကို လွင့်နေစေမယ့် Animation */
+.floating-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 8px;
+    animation: float 4s ease-in-out infinite;
+    text-shadow: 0 0 20px #0f0;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.book-item {
+    border: 1px solid #0f0;
+    padding: 15px;
+    background: rgba(0, 20, 0, 0.8);
+    text-align: center;
+    transition: 0.3s;
+}
+
+.book-item:hover {
+    box-shadow: 0 0 25px #0f0;
+    transform: scale(1.05);
+}
+
+.book-item img {
+    width: 100%;
+    border-radius: 2px;
+}
+
+.book-item h3 {
+    font-size: 0.9rem;
+    margin: 15px 0;
+    height: 40px;
+}
+
+.btn {
+    display: block;
+    background: #0f0;
+    color: #000;
+    text-decoration: none;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
