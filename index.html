@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Digital Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --ink: #f0ead6;
+    --ink2: #9a9080;
+    --ink3: #5a5448;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --red: #c0392b;
+    --accent: #2a6041;
+    --border: rgba(201,168,76,0.15);
+    --glow: rgba(201,168,76,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    width: 12px; height: 12px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+  }
+  .cursor-dot {
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* HEADER */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 4rem;
+    height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.98), transparent);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .logo span { color: var(--ink2); font-style: italic; font-weight: 400; }
+
+  nav { display: flex; gap: 3rem; align-items: center; }
+  nav a {
+    font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink2); text-decoration: none;
+    transition: color 0.3s;
+    position: relative;
+  }
+  nav a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 1px; background: var(--gold);
+    transform: scaleX(0); transform-origin: right;
+    transition: transform 0.3s;
+  }
+  nav a:hover { color: var(--gold); }
+  nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  .nav-count {
+    font-size: 0.65rem; color: var(--ink3);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.9rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding: 10rem 4rem 6rem;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; z-index: 2;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: block; width: 40px; height: 1px;
+    background: var(--gold);
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 5vw, 6rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+  }
+  .hero-title em {
+    display: block;
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--ink2);
+    line-height: 1.7;
+    max-width: 380px;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+
+  .hero-quote {
+    font-size: 0.7rem; letter-spacing: 0.08em;
+    color: var(--ink3); border-left: 2px solid var(--gold);
+    padding-left: 1rem; line-height: 1.6;
+    max-width: 320px;
+  }
+
+  .hero-actions { display: flex; gap: 1rem; align-items: center; margin-top: 2.5rem; }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #0a0a0a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    border: none; cursor: none; text-decoration: none;
+    transition: all 0.3s;
+    display: inline-block;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--gold2);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  .btn-ghost {
+    color: var(--ink2); font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--ink3);
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .btn-ghost:hover { color: var(--gold); border-color: var(--gold); }
+
+  .hero-right {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    padding: 8rem 4rem 6rem;
+  }
+
+  /* FLOATING BOOK STACK */
+  .book-stack {
+    position: relative; width: 320px; height: 420px;
+  }
+  .book {
+    position: absolute;
+    border-radius: 2px;
+    box-shadow: -6px 6px 30px rgba(0,0,0,0.7);
+    transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .book:nth-child(1) {
+    width: 200px; height: 280px;
+    background: linear-gradient(135deg, #1e3a2f, #2a6041);
+    top: 80px; left: 60px;
+    transform: rotate(-5deg);
+    animation: float1 6s ease-in-out infinite;
+  }
+  .book:nth-child(2) {
+    width: 180px; height: 260px;
+    background: linear-gradient(135deg, #3d1f1f, #8b2020);
+    top: 50px; left: 100px;
+    transform: rotate(3deg);
+    animation: float2 7s ease-in-out infinite;
+  }
+  .book:nth-child(3) {
+    width: 170px; height: 240px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    top: 110px; left: 130px;
+    transform: rotate(-2deg);
+    animation: float3 5.5s ease-in-out infinite;
+  }
+  .book-spine {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 20px;
+    background: rgba(0,0,0,0.3);
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .book-title-text {
+    position: absolute; top: 20px; left: 30px; right: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    color: rgba(240,234,214,0.6);
+    letter-spacing: 0.05em;
+  }
+  .book-line {
+    position: absolute; top: 50px; left: 30px; right: 10px;
+    height: 1px; background: rgba(201,168,76,0.3);
+  }
+
+  @keyframes float1 {
+    0%,100% { transform: rotate(-5deg) translateY(0); }
+    50% { transform: rotate(-5deg) translateY(-12px); }
+  }
+  @keyframes float2 {
+    0%,100% { transform: rotate(3deg) translateY(0); }
+    50% { transform: rotate(3deg) translateY(-8px); }
+  }
+  @keyframes float3 {
+    0%,100% { transform: rotate(-2deg) translateY(0); }
+    50% { transform: rotate(-2deg) translateY(-15px); }
+  }
+
+  /* BIG NUMBER */
+  .hero-num {
+    position: absolute; right: 3rem; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 20rem; font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(201,168,76,0.06);
+    line-height: 1; pointer-events: none;
+    user-select: none;
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden; background: var(--bg2);
+    padding: 0.8rem 0;
+  }
+  .marquee-track {
+    display: flex; gap: 0;
+    animation: marquee 25s linear infinite;
+    width: max-content;
+  }
+  .marquee-item {
+    padding: 0 3rem;
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink3);
+    display: flex; align-items: center; gap: 2rem;
+  }
+  .marquee-item::after { content: '◆'; color: var(--gold); font-size: 0.5rem; }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* STATS */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    padding: 3rem 4rem;
+    border-right: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: background 0.4s;
+  }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: var(--glow); }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; font-weight: 900;
+    line-height: 1; color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .stat-label {
+    font-size: 0.65rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink3);
+  }
+  .stat-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem; color: var(--ink2);
+    margin-top: 0.4rem; font-style: italic;
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    padding: 5rem 4rem 3rem;
+    display: flex; align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 3.5rem);
+    font-weight: 900; line-height: 1.1;
+  }
+  .section-title em { font-style: italic; color: var(--gold); font-weight: 400; }
+  .section-link {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink2); text-decoration: none;
+    display: flex; align-items: center; gap: 0.8rem;
+    transition: color 0.3s;
+  }
+  .section-link:hover { color: var(--gold); }
+  .section-link::after { content: '→'; }
+
+  /* SEARCH BAR */
+  .search-wrap {
+    padding: 3rem 4rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex; gap: 1rem; align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    background: none; border: none;
+    border-bottom: 1px solid var(--ink3);
+    padding: 1rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem; color: var(--ink);
+    letter-spacing: 0.05em;
+    outline: none; cursor: none;
+    transition: border-color 0.3s;
+  }
+  .search-input::placeholder { color: var(--ink3); }
+  .search-input:focus { border-color: var(--gold); }
+  .search-label {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink3); white-space: nowrap;
+  }
+  .search-kbd {
+    background: var(--bg3); border: 1px solid var(--border);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.6rem; color: var(--ink3);
+  }
+
+  /* FILTERS */
+  .filters {
+    padding: 1.5rem 4rem;
+    display: flex; gap: 0.75rem; align-items: center;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .filter-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-right: 0.5rem; }
+  .filter-btn {
+    background: none; border: 1px solid var(--border);
+    padding: 0.5rem 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.1em;
+    color: var(--ink2); cursor: none;
+    transition: all 0.25s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--gold); border-color: var(--gold);
+    color: #0a0a0a;
+  }
+
+  /* BOOK GRID */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0;
+  }
+
+  .book-card {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem;
+    position: relative; overflow: hidden;
+    cursor: none;
+    transition: background 0.4s;
+    animation: fadeInUp 0.6s both;
+  }
+  .book-card:hover { background: rgba(201,168,76,0.04); }
+  .book-card:hover .book-card-cover { transform: translateY(-4px) rotate(-1deg); }
+  .book-card:hover .book-card-cta { opacity: 1; transform: translateY(0); }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .book-card:nth-child(1) { animation-delay: 0.1s; }
+  .book-card:nth-child(2) { animation-delay: 0.15s; }
+  .book-card:nth-child(3) { animation-delay: 0.2s; }
+  .book-card:nth-child(4) { animation-delay: 0.25s; }
+  .book-card:nth-child(5) { animation-delay: 0.3s; }
+  .book-card:nth-child(6) { animation-delay: 0.35s; }
+
+  .book-card-num {
+    font-size: 0.62rem; color: var(--ink3); letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  .book-card-cover {
+    width: 100%; aspect-ratio: 3/4;
+    max-height: 200px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: -4px 4px 20px rgba(0,0,0,0.5);
+  }
+  .book-cover-img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block;
+  }
+  .book-cover-placeholder {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .book-cover-placeholder .spine { position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: rgba(0,0,0,0.25); }
+  .book-cover-placeholder .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem; text-align: center;
+    color: rgba(240,234,214,0.85);
+    line-height: 1.3;
+  }
+  .book-cover-placeholder .cover-author {
+    font-size: 0.6rem; letter-spacing: 0.1em;
+    color: rgba(240,234,214,0.4);
+    margin-top: 0.75rem; text-transform: uppercase;
+  }
+  .book-cover-placeholder .cover-line {
+    position: absolute; bottom: 20px; left: 25px; right: 10px;
+    height: 1px; background: rgba(255,255,255,0.1);
+  }
+
+  .book-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+  .book-genre {
+    font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); 
+  }
+  .book-year { font-size: 0.6rem; color: var(--ink3); }
+
+  .book-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700; line-height: 1.25;
+    margin-bottom: 0.4rem;
+    transition: color 0.3s;
+  }
+  .book-card:hover .book-card-title { color: var(--gold); }
+
+  .book-card-author {
+    font-size: 0.7rem; color: var(--ink2);
+    letter-spacing: 0.05em; margin-bottom: 1rem;
+  }
+
+  .book-card-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem; color: var(--ink3); line-height: 1.6;
+    font-style: italic;
+    display: -webkit-box; -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .book-card-footer {
+    margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .book-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    color: var(--ink3);
+  }
+
+  .book-card-cta {
+    font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); text-decoration: none;
+    opacity: 0; transform: translateY(4px);
+    transition: all 0.3s;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .book-card-cta::after { content: '→'; }
+
+  /* FEATURED SECTION */
+  .featured-section { border-bottom: 1px solid var(--border); }
+
+  .featured-card {
+    display: grid; grid-template-columns: 1fr 2fr;
+    min-height: 500px;
+  }
+  .featured-visual {
+    background: linear-gradient(135deg, #1a2a1e, #0d1a10);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: 4rem;
+  }
+  .featured-visual::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(42,96,65,0.4), transparent 60%);
+  }
+  .featured-book-3d {
+    width: 180px; height: 260px;
+    background: linear-gradient(135deg, #1e4a2f, #2a6041);
+    box-shadow: -8px 8px 40px rgba(0,0,0,0.8), inset -3px 0 10px rgba(0,0,0,0.3);
+    position: relative; z-index: 1;
+    transform: perspective(600px) rotateY(-15deg) rotateX(5deg);
+    transition: transform 0.6s;
+  }
+  .featured-visual:hover .featured-book-3d {
+    transform: perspective(600px) rotateY(-8deg) rotateX(2deg);
+  }
+  .featured-book-3d .spine { position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: rgba(0,0,0,0.4); }
+  .featured-book-3d .f-title {
+    position: absolute; top: 25px; left: 30px; right: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; color: rgba(240,234,214,0.8); line-height: 1.3;
+  }
+  .featured-book-3d .f-line { position: absolute; top: 80px; left: 30px; right: 10px; height: 1px; background: rgba(201,168,76,0.4); }
+  .featured-book-3d .f-author {
+    position: absolute; bottom: 25px; left: 30px; right: 10px;
+    font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(240,234,214,0.4);
+  }
+
+  .featured-content {
+    padding: 5rem;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .featured-label {
+    font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .featured-label::before { content: '★'; font-size: 0.5rem; }
+  .featured-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 900; line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .featured-author { font-size: 0.75rem; color: var(--ink2); margin-bottom: 2rem; letter-spacing: 0.05em; }
+  .featured-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem; color: var(--ink2);
+    line-height: 1.8; font-style: italic;
+    margin-bottom: 3rem; max-width: 500px;
+  }
+  .featured-meta { display: flex; gap: 3rem; margin-bottom: 3rem; }
+  .feat-meta-item { }
+  .feat-meta-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 0.3rem; }
+  .feat-meta-val { font-size: 0.85rem; color: var(--ink2); }
+
+  /* ADD BOOK MODAL */
+  .fab {
+    position: fixed; bottom: 3rem; right: 3rem; z-index: 200;
+    width: 56px; height: 56px;
+    background: var(--gold);
+    border: none; cursor: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #0a0a0a;
+    box-shadow: 0 8px 30px rgba(201,168,76,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .fab:hover {
+    transform: scale(1.1) rotate(45deg);
+    box-shadow: 0 12px 40px rgba(201,168,76,0.6);
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s;
+    backdrop-filter: blur(8px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    width: 90%; max-width: 600px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 3rem;
+    transform: translateY(20px);
+    transition: transform 0.4s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 900;
+    margin-bottom: 0.5rem;
+  }
+  .modal-sub { font-size: 0.7rem; color: var(--ink3); letter-spacing: 0.08em; margin-bottom: 2.5rem; }
+
+  .form-group { margin-bottom: 1.5rem; }
+  .form-label {
+    display: block; font-size: 0.62rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink3); margin-bottom: 0.6rem;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.9rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem; color: var(--ink);
+    outline: none; cursor: none;
+    transition: border-color 0.3s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select { appearance: none; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .color-picks { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .color-pick {
+    width: 36px; height: 36px; cursor: none;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .color-pick:hover, .color-pick.selected { border-color: var(--gold); transform: scale(1.1); }
+
+  .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2.5rem; }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: var(--ink2); cursor: none;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .btn-cancel:hover { border-color: var(--ink2); color: var(--ink); }
+  .btn-save {
+    background: var(--gold); border: none;
+    padding: 0.8rem 2rem;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: #0a0a0a; cursor: none;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 500;
+    transition: background 0.3s;
+  }
+  .btn-save:hover { background: var(--gold2); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 4rem;
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    gap: 4rem;
+    background: var(--bg2);
+  }
+  .footer-brand .logo { font-size: 1.4rem; display: block; margin-bottom: 1rem; }
+  .footer-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; color: var(--ink2); font-style: italic;
+    line-height: 1.6; max-width: 300px;
+  }
+  .footer-col h4 {
+    font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem;
+  }
+  .footer-col a {
+    display: block; font-size: 0.75rem; color: var(--ink2);
+    text-decoration: none; margin-bottom: 0.75rem;
+    transition: color 0.3s;
+  }
+  .footer-col a:hover { color: var(--gold); }
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.62rem; letter-spacing: 0.1em; color: var(--ink3);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    grid-column: 1/-1;
+    padding: 8rem 4rem;
+    text-align: center;
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.3; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .empty-sub { font-size: 0.75rem; color: var(--ink3); letter-spacing: 0.08em; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--bg2); border: 1px solid var(--gold);
+    padding: 1rem 2rem; font-size: 0.75rem; letter-spacing: 0.08em;
+    color: var(--gold); z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* READING PROGRESS */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(to right, var(--gold), var(--gold2));
+    z-index: 999; transition: width 0.1s;
+    box-shadow: 0 0 10px rgba(201,168,76,0.5);
+  }
+
+  /* SCROLL ANIMATIONS */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    header { padding: 0 1.5rem; }
+    nav { gap: 1.5rem; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 8rem 1.5rem 4rem; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .stat { padding: 2rem 1.5rem; }
+    .section-header { padding: 3rem 1.5rem 2rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .search-wrap { padding: 2rem 1.5rem; }
+    .filters { padding: 1rem 1.5rem; }
+    .books-grid { grid-template-columns: 1fr; }
+    .book-card { border-right: none; }
+    .featured-card { grid-template-columns: 1fr; }
+    .featured-visual { min-height: 300px; }
+    .featured-content { padding: 2.5rem 1.5rem; }
+    footer { grid-template-columns: 1fr; padding: 2.5rem 1.5rem; }
+    .footer-bottom { padding: 1rem 1.5rem; flex-direction: column; gap: 0.5rem; }
+    .hero-title { font-size: 3rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">MDL <span>/ Library</span></a>
+  <nav>
+    <a href="#collection">Collection</a>
+    <a href="#featured">Featured</a>
+    <a href="#about">About</a>
+    <span class="nav-count" id="bookCount">0 Books</span>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="hero-eyebrow">My Digital Library</div>
+    <h1 class="hero-title">
+      A Library<br>
+      <em>is not</em><br>
+      a church.
+    </h1>
+    <p class="hero-sub">Knowledge lives here. Curated, catalogued, and kept — every book a world waiting to be entered.</p>
+    <blockquote class="hero-quote">
+      "A room without books is like a body without a soul." — Marcus Tullius Cicero
+    </blockquote>
+    <div class="hero-actions">
+      <a href="#collection" class="btn-primary"><span>Browse Collection</span></a>
+      <a href="#" class="btn-ghost" id="openAddModal">Add a Book</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="book-stack">
+      <div class="book"><div class="book-spine"></div><div class="book-title-text">The Art of Reading</div><div class="book-line"></div></div>
+      <div class="book"><div class="book-spine"></div><div class="book-title-text">Digital Worlds</div><div class="book-line"></div></div>
+      <div class="book"><div class="book-spine"></div><div class="book-title-text">Modern Minds</div><div class="book-line"></div></div>
+    </div>
+    <div class="hero-num">§</div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marqueeTrack">
+    <div class="marquee-item">My Digital Library</div>
+    <div class="marquee-item">A Library is not a church</div>
+    <div class="marquee-item">Knowledge Preserved</div>
+    <div class="marquee-item">Curated Collection</div>
+    <div class="marquee-item">Every Book a World</div>
+    <div class="marquee-item">Read · Reflect · Return</div>
+    <div class="marquee-item">My Digital Library</div>
+    <div class="marquee-item">A Library is not a church</div>
+    <div class="marquee-item">Knowledge Preserved</div>
+    <div class="marquee-item">Curated Collection</div>
+    <div class="marquee-item">Every Book a World</div>
+    <div class="marquee-item">Read · Reflect · Return</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar reveal" id="stats">
+  <div class="stat">
+    <div class="stat-num" id="statTotal">0</div>
+    <div class="stat-label">Total Books</div>
+    <div class="stat-desc">In the collection</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="statGenres">0</div>
+    <div class="stat-label">Genres</div>
+    <div class="stat-desc">Diverse categories</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="statRead">0</div>
+    <div class="stat-label">Books Read</div>
+    <div class="stat-desc">Completed reads</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="statYear">—</div>
+    <div class="stat-label">Latest Added</div>
+    <div class="stat-desc">Most recent book</div>
+  </div>
+</div>
+
+<!-- FEATURED -->
+<section class="featured-section reveal" id="featured">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Spotlight</div>
+      <h2 class="section-title">Featured <em>Pick</em></h2>
+    </div>
+  </div>
+  <div class="featured-card" id="featuredCard">
+    <div class="featured-visual">
+      <div class="featured-book-3d">
+        <div class="spine"></div>
+        <div class="f-title" id="featTitle">Add your first book to see it featured here.</div>
+        <div class="f-line"></div>
+        <div class="f-author" id="featAuthorCover">—</div>
+      </div>
+    </div>
+    <div class="featured-content">
+      <div class="featured-label">Editor's Pick</div>
+      <h3 class="featured-title" id="featTitleMain">Waiting for a great book...</h3>
+      <div class="featured-author" id="featAuthor">Add books to your collection to get started.</div>
+      <p class="featured-desc" id="featDesc">Your library is a reflection of your mind — begin filling it with the worlds, ideas, and stories that matter most to you.</p>
+      <div class="featured-meta">
+        <div class="feat-meta-item">
+          <div class="feat-meta-label">Genre</div>
+          <div class="feat-meta-val" id="featGenre">—</div>
+        </div>
+        <div class="feat-meta-item">
+          <div class="feat-meta-label">Year</div>
+          <div class="feat-meta-val" id="featYear">—</div>
+        </div>
+        <div class="feat-meta-item">
+          <div class="feat-meta-label">Pages</div>
+          <div class="feat-meta-val" id="featPages">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COLLECTION -->
+<section id="collection">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">Collection</div>
+      <h2 class="section-title">The <em>Library</em></h2>
+    </div>
+    <a href="#" class="section-link" id="openAddModal2">Add new book</a>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-label">Search</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Type a title, author, or genre...">
+    <span class="search-kbd">⌘K</span>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters" id="filtersRow">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="Reading">Reading</button>
+    <button class="filter-btn" data-filter="Completed">Completed</button>
+    <button class="filter-btn" data-filter="Want to Read">Want to Read</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="books-grid" id="booksGrid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer id="about">
+  <div class="footer-brand">
+    <a href="#" class="logo">MDL <span>/ Library</span></a>
+    <p class="footer-tagline">"A library is not a luxury but one of the necessities of life." — Henry Ward Beecher</p>
+  </div>
+  <div class="footer-col">
+    <h4>Navigate</h4>
+    <a href="#collection">Collection</a>
+    <a href="#featured">Featured</a>
+    <a href="#" id="openAddModal3">Add Book</a>
+  </div>
+  <div class="footer-col">
+    <h4>Project</h4>
+    <a href="https://github.com/thethanlwintunoffical2026/My_Digital_Library1" target="_blank">GitHub Repo</a>
+    <a href="#">README</a>
+    <a href="#">Changelog</a>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <span>My_Digital_Library1 — A Library is not a church.</span>
+  <span>thethanlwintunoffical2026</span>
+</div>
+
+<!-- ADD BOOK MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Add a Book</div>
+    <div class="modal-sub">// new_entry → library.push(book)</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" class="form-input" id="fTitle" placeholder="Book title">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Author *</label>
+        <input type="text" class="form-input" id="fAuthor" placeholder="Author name">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Genre</label>
+        <select class="form-select" id="fGenre">
+          <option value="">— Select genre —</option>
+          <option>Fiction</option>
+          <option>Non-Fiction</option>
+          <option>Science Fiction</option>
+          <option>Fantasy</option>
+          <option>Mystery</option>
+          <option>Thriller</option>
+          <option>Biography</option>
+          <option>History</option>
+          <option>Philosophy</option>
+          <option>Psychology</option>
+          <option>Science</option>
+          <option>Technology</option>
+          <option>Self-Help</option>
+          <option>Poetry</option>
+          <option>Comics/Manga</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year Published</label>
+        <input type="number" class="form-input" id="fYear" placeholder="e.g. 2023" min="1000" max="2099">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Pages</label>
+        <input type="number" class="form-input" id="fPages" placeholder="Number of pages">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="fStatus">
+          <option>Want to Read</option>
+          <option>Reading</option>
+          <option>Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" id="fDesc" placeholder="A brief description or your personal notes..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cover Color</label>
+      <div class="color-picks" id="colorPicks">
+        <div class="color-pick selected" style="background:linear-gradient(135deg,#1e3a2f,#2a6041)" data-color="green"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#3d1f1f,#8b2020)" data-color="red"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#1a1a2e,#16213e)" data-color="navy"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#2e1a00,#5c3a00)" data-color="brown"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#1a0030,#3d0070)" data-color="purple"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#001a2e,#002e5c)" data-color="blue"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#1a1a1a,#333)" data-color="dark"></div>
+        <div class="color-pick" style="background:linear-gradient(135deg,#2e2a00,#5c5400)" data-color="gold"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" id="closeModal">Cancel</button>
+      <button class="btn-save" id="saveBook">Add to Library</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" title="Add Book">+</button>
+
+<script>
+const COLORS = {
+  green: 'linear-gradient(135deg,#1e3a2f,#2a6041)',
+  red: 'linear-gradient(135deg,#3d1f1f,#8b2020)',
+  navy: 'linear-gradient(135deg,#1a1a2e,#16213e)',
+  brown: 'linear-gradient(135deg,#2e1a00,#5c3a00)',
+  purple: 'linear-gradient(135deg,#1a0030,#3d0070)',
+  blue: 'linear-gradient(135deg,#001a2e,#002e5c)',
+  dark: 'linear-gradient(135deg,#1a1a1a,#333)',
+  gold: 'linear-gradient(135deg,#2e2a00,#5c5400)'
+};
+
+let books = JSON.parse(localStorage.getItem('mdl_books') || '[]');
+let filterStatus = 'all';
+let searchQuery = '';
+let selectedColor = 'green';
+
+// CURSOR
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  cursorDot.style.left = e.clientX + 'px';
+  cursorDot.style.top = e.clientY + 'px';
+});
+document.addEventListener('mousedown', () => {
+  cursor.style.width = '20px';
+  cursor.style.height = '20px';
+  cursor.style.background = 'rgba(201,168,76,0.2)';
+});
+document.addEventListener('mouseup', () => {
+  cursor.style.width = '12px';
+  cursor.style.height = '12px';
+  cursor.style.background = 'none';
+});
+
+// SCROLL PROGRESS
+window.addEventListener('scroll', () => {
+  const prog = document.getElementById('progressBar');
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  prog.style.width = pct + '%';
+});
+
+// REVEAL ON SCROLL
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+reveals.forEach(r => observer.observe(r));
+
+// KEYBOARD SHORTCUT
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') closeModalFn();
+});
+
+// MODAL
+const overlay = document.getElementById('modalOverlay');
+function openModalFn() { overlay.classList.add('open'); }
+function closeModalFn() { overlay.classList.remove('open'); }
+
+['openAddModal','openAddModal2','openAddModal3','fabBtn'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', e => { e.preventDefault(); openModalFn(); });
+});
+document.getElementById('closeModal').addEventListener('click', closeModalFn);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModalFn(); });
+
+// COLOR PICKS
+document.querySelectorAll('.color-pick').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.color-pick').forEach(x => x.classList.remove('selected'));
+    p.classList.add('selected');
+    selectedColor = p.dataset.color;
+  });
+});
+
+// TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// SAVE BOOK
+document.getElementById('saveBook').addEventListener('click', () => {
+  const title = document.getElementById('fTitle').value.trim();
+  const author = document.getElementById('fAuthor').value.trim();
+  if (!title || !author) { showToast('⚠ Title and Author are required.'); return; }
+
+  const book = {
+    id: Date.now(),
+    title,
+    author,
+    genre: document.getElementById('fGenre').value || 'Uncategorized',
+    year: document.getElementById('fYear').value || '—',
+    pages: document.getElementById('fPages').value || '—',
+    status: document.getElementById('fStatus').value,
+    desc: document.getElementById('fDesc').value.trim() || 'No description added.',
+    color: selectedColor,
+    added: new Date().toLocaleDateString()
+  };
+
+  books.unshift(book);
+  localStorage.setItem('mdl_books', JSON.stringify(books));
+
+  // Reset form
+  ['fTitle','fAuthor','fYear','fPages','fDesc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fGenre').value = '';
+  document.getElementById('fStatus').value = 'Want to Read';
+  selectedColor = 'green';
+  document.querySelectorAll('.color-pick').forEach((p,i) => p.classList.toggle('selected', i===0));
+
+  closeModalFn();
+  renderBooks();
+  updateStats();
+  updateFeatured();
+  showToast(`✓ "${title}" added to your library.`);
+});
+
+// SEARCH & FILTER
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value.toLowerCase();
+  renderBooks();
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterStatus = btn.dataset.filter;
+    renderBooks();
+  });
+});
+
+// DELETE BOOK
+function deleteBook(id) {
+  books = books.filter(b => b.id !== id);
+  localStorage.setItem('mdl_books', JSON.stringify(books));
+  renderBooks();
+  updateStats();
+  updateFeatured();
+  showToast('Book removed from library.');
+}
+
+// RENDER BOOKS
+function renderBooks() {
+  const grid = document.getElementById('booksGrid');
+  let filtered = books;
+
+  if (filterStatus !== 'all') {
+    filtered = filtered.filter(b => b.status === filterStatus);
+  }
+  if (searchQuery) {
+    filtered = filtered.filter(b =>
+      b.title.toLowerCase().includes(searchQuery) ||
+      b.author.toLowerCase().includes(searchQuery) ||
+      b.genre.toLowerCase().includes(searchQuery)
+    );
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">§</div>
+        <div class="empty-title">${books.length === 0 ? 'Your library is empty' : 'No books match your search'}</div>
+        <div class="empty-sub">${books.length === 0 ? 'Click "Add a Book" to begin your collection' : 'Try adjusting your filters or search term'}</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((b, i) => `
+    <div class="book-card" style="animation-delay:${i * 0.06}s">
+      <div class="book-card-num">${String(i+1).padStart(3,'0')}</div>
+      <div class="book-card-cover">
+        <div class="book-cover-placeholder" style="background:${COLORS[b.color]||COLORS.green}">
+          <div class="spine"></div>
+          <div class="cover-title">${b.title}</div>
+          <div class="cover-author">${b.author}</div>
+          <div class="cover-line"></div>
+        </div>
+      </div>
+      <div class="book-meta">
+        <span class="book-genre">${b.genre}</span>
+        <span class="book-year">${b.year}</span>
+      </div>
+      <div class="book-card-title">${b.title}</div>
+      <div class="book-card-author">by ${b.author}</div>
+      <div class="book-card-desc">${b.desc}</div>
+      <div class="book-card-footer">
+        <div class="book-tags">
+          <span class="tag">${b.status}</span>
+          ${b.pages !== '—' ? `<span class="tag">${b.pages}p</span>` : ''}
+        </div>
+        <a href="#" class="book-card-cta" onclick="event.preventDefault();deleteBook(${b.id})">Remove</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+// UPDATE STATS
+function updateStats() {
+  const total = books.length;
+  const genres = [...new Set(books.map(b => b.genre))].length;
+  const read = books.filter(b => b.status === 'Completed').length;
+  const latest = books.length ? books[0].year : '—';
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statGenres').textContent = genres;
+  document.getElementById('statRead').textContent = read;
+  document.getElementById('statYear').textContent = latest;
+  document.getElementById('bookCount').textContent = `${total} Book${total !== 1 ? 's' : ''}`;
+}
+
+// UPDATE FEATURED
+function updateFeatured() {
+  if (books.length === 0) return;
+  const b = books[0];
+  document.getElementById('featTitle').textContent = b.title;
+  document.getElementById('featAuthorCover').textContent = b.author;
+  document.getElementById('featTitleMain').textContent = b.title;
+  document.getElementById('featAuthor').textContent = `by ${b.author}`;
+  document.getElementById('featDesc').textContent = b.desc;
+  document.getElementById('featGenre').textContent = b.genre;
+  document.getElementById('featYear').textContent = b.year;
+  document.getElementById('featPages').textContent = b.pages !== '—' ? b.pages + ' pages' : '—';
+  document.querySelector('.featured-book-3d').style.background = COLORS[b.color] || COLORS.green;
+}
+
+// ANIMATED COUNTERS
+function animateCounter(el, target) {
+  let current = 0;
+  const step = Math.ceil(target / 30);
+  const interval = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = current;
+    if (current >= target) clearInterval(interval);
+  }, 40);
+}
+
+// INIT
+renderBooks();
+updateStats();
+updateFeatured();
+</script>
+</body>
+</html>
