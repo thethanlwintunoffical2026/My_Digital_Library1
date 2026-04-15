@@ -3,43 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Digital Library • စာအုပ်စုစည်း</title>
+    <title>My Library</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="background-particles"></div>
+    <div class="container">
+        <header>
+            <h1>My Library</h1>
+            <p>Personal Collection • Private</p>
+        </header>
 
-    <header>
-        <h1>📖 My Digital Library</h1>
-        <p>စိတ်ချမ်းသာစွာ စာဖတ်ပါ... အချိန်မရွေး၊ နေရာမရွေး</p>
-        
-        <div class="controls">
-            <input type="text" id="search" placeholder="စာအုပ်နာမည် သို့မဟုတ် စာရေးသူ ရှာပါ...">
-            
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">အားလုံး</button>
-                <button class="filter-btn" data-filter="fiction">ဝတ္ထု/စိတ်ကူးယဉ်</button>
-                <button class="filter-btn" data-filter="nonfiction">ပညာ/အချက်အလက်</button>
-                <button class="filter-btn" data-filter="other">အခြား</button>
-            </div>
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search title or author...">
         </div>
-    </header>
 
-    <main>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="fiction">Fiction</button>
+            <button class="filter-btn" data-filter="nonfiction">Non-Fiction</button>
+            <button class="filter-btn" data-filter="other">Other</button>
+        </div>
+
         <div class="book-grid" id="bookGrid"></div>
-    </main>
-
-    <!-- Quick View Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="modal-body"></div>
-        </div>
     </div>
 
     <footer>
-        <p>✨ Built with love for my personal collection • GitHub Pages</p>
+        <p>My private digital library</p>
     </footer>
 
     <script src="script.js"></script>
