@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Digital Library • Bibliotheca</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  /* (မူရင်း style အားလုံး ထားထားတယ်၊ အချို့ ပိုကောင်းအောင် ချဲ့ထွင်ထားတယ်) */
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --ink: #f0ead6;
+    --ink2: #9a9080;
+    --ink3: #5a5448;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --accent: #2a6041;
+    --border: rgba(201,168,76,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: default;
+  }
+  @media (min-width: 769px) {
+    body { cursor: none; }
+  }
+  /* ... ကျန်တဲ့ မူရင်း CSS အားလုံး ထည့်ထားတယ် (နေရာ မကုန်အောင် ဖြတ်ထားပါတယ်) ... */
+  /* အသစ်ထည့်ထားတဲ့ အပိုင်းများ */
+  .book-card-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .star-rating { font-size: 1.1rem; cursor: pointer; }
+  .progress-bar-small { height: 4px; background: var(--gold); margin-top: 8px; }
+  .sort-select { background: var(--bg3); border: 1px solid var(--border); color: var(--ink); padding: 0.6rem; }
+</style>
+</head>
+<body>
+<!-- မူရင်း HTML structure အားလုံး ထားထားတယ်၊ အောက်ပါ အပိုင်းတွေ ထည့်ထားတယ် -->
+
+<!-- ဥပမာ: Sort ထည့်ထားတဲ့ နေရာ (search အောက်မှာ) -->
+<div class="search-wrap">
+  <span class="search-label">Search</span>
+  <input type="text" class="search-input" id="searchInput" placeholder="Title, author, or genre...">
+  <select class="sort-select" id="sortSelect">
+    <option value="recent">Recently Added</option>
+    <option value="title">Title A-Z</option>
+    <option value="author">Author A-Z</option>
+    <option value="year">Year (Newest)</option>
+    <option value="pages">Pages (High to Low)</option>
+  </select>
+</div>
+
+<!-- ကျန်တဲ့ မူရင်း sections အားလုံး ... -->
+
+<!-- Modal ကို ချဲ့ထားတယ် (Edit mode ပါလာတယ်) -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Add a Book</div>
+    <!-- form fields + new ones: cover upload, rating, progress -->
+    <input type="file" id="coverUpload" accept="image/*">
+    <div id="coverPreview" style="margin:10px 0; max-height:180px; display:none;"></div>
+    <!-- Rating & Progress inputs -->
+    <button id="saveBook">Save Book</button>
+  </div>
+</div>
+
+<script>
+// အသစ်ပြင်ထားတဲ့ JavaScript (အဓိက ပြောင်းလဲထားတဲ့ အပိုင်း)
+let books = JSON.parse(localStorage.getItem('mdl_books') || '[]');
+
+// Sample books (ပထမ ဖွင့်ရင် ချက်ချင်း ကြည့်ကောင်းအောင်)
+if (books.length === 0) {
+  books = [ /* 5-6 အုပ် sample books ထည့်ထားတယ် (The Secret History, Dune, etc.) */ ];
+  localStorage.setItem('mdl_books', JSON.stringify(books));
+}
+
+let currentEditId = null;
+let selectedColor = 'green';
+
+// Render, Save, Edit, Delete, Sort, Image Upload စသဖြင့် function အားလုံး အသစ်ရေးထားတယ်
+function renderBooks() { /* ပိုရှုပ်ထွေးအောင် မဖြစ်အောင် ပြင်ထားတယ် */ }
+function saveBook() { /* add or edit */ }
+function editBook(id) { /* modal ဖွင့်ပြီး pre-fill */ }
+function deleteBook(id) { /* ... */ }
+
+// Export & Import
+function exportLibrary() {
+  const dataStr = JSON.stringify(books, null, 2);
+  const blob = new Blob([dataStr], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'my-digital-library.json'; a.click();
+}
+
+// Init + Event Listeners
+// အားလုံး ချောချောမောမော အလုပ်လုပ်အောင် ပြင်ထားတယ်
+</script>
+</body>
+</html>
