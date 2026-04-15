@@ -1,82 +1,119 @@
-const books = [
-    {
-        title: "စာအုပ်နာမည် ၁",
-        author: "စာရေးသူ နာမည်",
-        category: "fiction",
-        cover: "images/book1.jpg",
-        link: "#",
-        desc: "ဤစာအုပ်အကြောင်း တိုတိုရှင်းရှင်း ဖော်ပြချက်..."
-    },
-    // ဒီမှာ မင်းစာအုပ်တွေ ထပ်ထည့်ပါ (category: fiction / nonfiction / other)
-    // ဥပမာ နောက်ထပ် object တစ်ခု ထည့်ရင် comma မမေ့နဲ့
-];
-
-const bookGrid = document.getElementById('bookGrid');
-const searchInput = document.getElementById('search');
-const filterBtns = document.querySelectorAll('.filter-btn');
-const modal = document.getElementById('modal');
-const modalBody = document.getElementById('modal-body');
-const closeModal = document.querySelector('.close');
-
-function renderBooks(filteredBooks) {
-    bookGrid.innerHTML = '';
-    filteredBooks.forEach((book, index) => {
-        const card = document.createElement('div');
-        card.className = 'book-card';
-        card.innerHTML = `
-            <img src="${book.cover}" alt="${book.title}">
-            <div class="book-info">
-                <h3>${book.title}</h3>
-                <p>${book.author}</p>
-            </div>
-        `;
-        card.addEventListener('click', () => showModal(book));
-        bookGrid.appendChild(card);
-    });
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-function showModal(book) {
-    modalBody.innerHTML = `
-        <img src="${book.cover}" style="width:100%; border-radius:12px; margin-bottom:20px;">
-        <h2>${book.title}</h2>
-        <p style="opacity:0.9; font-size:1.1rem;">${book.author}</p>
-        <p style="margin-top:15px;">${book.desc || 'ဤစာအုပ်ကို ဖတ်ရှုရန် အောက်ပါ လင့်ခ်ကို နှိပ်ပါ။'}</p>
-        <a href="${book.link}" target="_blank" style="display:inline-block; margin-top:20px; padding:12px 30px; background:#ffd700; color:#0a0a1f; border-radius:50px; text-decoration:none; font-weight:bold;">📥 ဖတ်ရန် / ဒေါင်းလုဒ်</a>
-    `;
-    modal.style.display = 'block';
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.6;
+    padding: 40px 20px;
 }
 
-closeModal.onclick = () => modal.style.display = 'none';
-window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-
-// Filter & Search
-let currentFilter = 'all';
-
-filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        filterBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.getAttribute('data-filter');
-        applyFilter();
-    });
-});
-
-function applyFilter() {
-    let filtered = books;
-    if (currentFilter !== 'all') {
-        filtered = books.filter(b => b.category === currentFilter);
-    }
-    const term = searchInput.value.toLowerCase();
-    if (term) {
-        filtered = filtered.filter(b => 
-            b.title.toLowerCase().includes(term) || 
-            b.author.toLowerCase().includes(term)
-        );
-    }
-    renderBooks(filtered);
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
-searchInput.addEventListener('input', applyFilter);
+header {
+    text-align: center;
+    margin-bottom: 50px;
+}
 
-// Initial render
-renderBooks(books);
+h1 {
+    font-size: 2.8rem;
+    font-weight: 400;
+    letter-spacing: -1px;
+}
+
+header p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-top: 8px;
+}
+
+.search-bar {
+    max-width: 600px;
+    margin: 0 auto 40px;
+}
+
+#search {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1.1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+}
+
+#search:focus {
+    border-color: #333;
+}
+
+.filters {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.filter-btn {
+    padding: 8px 20px;
+    margin: 0 6px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.filter-btn.active {
+    background: #1a1a1a;
+    color: white;
+    border-color: #1a1a1a;
+}
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+}
+
+.book-card {
+    background: white;
+    border: 1px solid #eee;
+    padding: 10px;
+    transition: all 0.2s ease;
+}
+
+.book-card:hover {
+    border-color: #999;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    transform: translateY(-4px);
+}
+
+.book-card img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.book-info h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.book-info p {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+footer {
+    text-align: center;
+    margin-top: 80px;
+    color: #aaa;
+    font-size: 0.9rem;
+}
