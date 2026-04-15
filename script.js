@@ -1,25 +1,36 @@
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
+/* Review Popup Style */
+.review-popup {
+    position: absolute;
+    top: 50%;
+    left: 110%; /* စာအုပ်ရဲ့ ညာဘက်ဘေးမှာ ပေါ်မယ် */
+    width: 200px;
+    background: rgba(0, 255, 65, 0.1);
+    border-left: 3px solid var(--neon-green);
+    padding: 10px;
+    font-size: 0.85rem;
+    color: var(--neon-green);
+    text-align: left;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+    z-index: 20;
+    line-height: 1.5;
+    text-shadow: 0 0 5px var(--neon-green);
+}
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+/* Hover တဲ့အခါ ပေါ်လာပုံ */
+.book-node:hover .review-popup {
+    opacity: 1;
+    transform: translateX(0);
+}
 
-const chars = "0101010101010101";
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = Array(Math.floor(columns)).fill(1);
-
-function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#0f0";
-    ctx.font = fontSize + "px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = chars.charAt(Math.floor(Math.random() * chars.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
+/* ဖုန်းနဲ့ကြည့်ရင် review ကို အောက်မှာ ပြမယ် */
+@media (max-width: 768px) {
+    .review-popup {
+        left: 0;
+        top: 105%;
+        width: 100%;
     }
 }
-setInterval(draw, 35);
