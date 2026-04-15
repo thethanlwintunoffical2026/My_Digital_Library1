@@ -1,103 +1,425 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Digital Library • Bibliotheca</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
-  /* (မူရင်း style အားလုံး ထားထားတယ်၊ အချို့ ပိုကောင်းအောင် ချဲ့ထွင်ထားတယ်) */
-  :root {
-    --bg: #0a0a0a;
-    --bg2: #111111;
-    --bg3: #1a1a1a;
-    --ink: #f0ead6;
-    --ink2: #9a9080;
-    --ink3: #5a5448;
-    --gold: #c9a84c;
-    --gold2: #e8c97a;
-    --accent: #2a6041;
-    --border: rgba(201,168,76,0.15);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'DM Mono', monospace;
-    overflow-x: hidden;
-    cursor: default;
-  }
-  @media (min-width: 769px) {
-    body { cursor: none; }
-  }
-  /* ... ကျန်တဲ့ မူရင်း CSS အားလုံး ထည့်ထားတယ် (နေရာ မကုန်အောင် ဖြတ်ထားပါတယ်) ... */
-  /* အသစ်ထည့်ထားတဲ့ အပိုင်းများ */
-  .book-card-cover img { width: 100%; height: 100%; object-fit: cover; }
-  .star-rating { font-size: 1.1rem; cursor: pointer; }
-  .progress-bar-small { height: 4px; background: var(--gold); margin-top: 8px; }
-  .sort-select { background: var(--bg3); border: 1px solid var(--border); color: var(--ink); padding: 0.6rem; }
+:root {
+  --bg: #0a0a0a; --bg2: #111111; --bg3: #1a1a1a;
+  --ink: #f0ead6; --ink2: #9a9080; --ink3: #5a5448;
+  --gold: #c9a84c; --gold2: #e8c97a; --border: rgba(201,168,76,0.15);
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: 'DM Mono', monospace; line-height: 1.6;
+  overflow-x: hidden;
+}
+@media (min-width: 769px) { body { cursor: none; } }
+
+/* ကျန်တဲ့ မူရင်း style အားလုံး (အရှည်ကြောင့် အဓိက အပိုင်းတွေ ထည့်ထားတယ်) */
+.cursor { width:12px; height:12px; border:1px solid var(--gold); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:all 0.2s; }
+.cursor-dot { width:4px; height:4px; background:var(--gold); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); }
+
+header { position:fixed; top:0; left:0; right:0; z-index:100; padding:0 4rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(10,10,10,0.98),transparent); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+.logo { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:900; letter-spacing:0.04em; color:var(--gold); text-decoration:none; }
+nav a { font-size:0.75rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink2); text-decoration:none; margin:0 1.5rem; position:relative; }
+nav a:hover { color:var(--gold); }
+nav a::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px; background:var(--gold); transition:width 0.3s; }
+nav a:hover::after { width:100%; }
+
+.hero { min-height:100vh; display:grid; grid-template-columns:1fr 1fr; }
+.hero-left { padding:10rem 4rem 6rem; display:flex; flex-direction:column; justify-content:center; }
+.hero-title { font-family:'Playfair Display',serif; font-size:clamp(3.5rem,6vw,6rem); font-weight:900; line-height:0.95; }
+.hero-title em { color:var(--gold); font-style:italic; font-weight:400; }
+
+.books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:0; }
+.book-card { border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:2.5rem; transition:background 0.4s; }
+.book-card:hover { background:rgba(201,168,76,0.05); }
+.book-card-cover { width:100%; aspect-ratio:3/4; margin-bottom:1rem; overflow:hidden; box-shadow:-4px 4px 20px rgba(0,0,0,0.6); position:relative; }
+.book-card-cover img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s; }
+.book-card:hover .book-card-cover img { transform:scale(1.04); }
+
+.star { color:#555; cursor:pointer; font-size:1.2rem; }
+.star.filled { color:var(--gold); }
+
+.modal { background:var(--bg2); border:1px solid var(--border); padding:3rem; max-width:620px; width:90%; }
+.form-input, .form-select, .form-textarea { width:100%; background:var(--bg3); border:1px solid var(--border); padding:0.9rem; color:var(--ink); margin-bottom:1rem; }
+.color-pick { width:40px; height:40px; border-radius:4px; cursor:pointer; border:2px solid transparent; }
+.color-pick.selected { border-color:var(--gold); }
+
+.btn-primary { background:var(--gold); color:#0a0a0a; padding:1rem 2.5rem; border:none; font-weight:500; cursor:pointer; }
+.btn-secondary { background:transparent; border:1px solid var(--border); color:var(--ink2); padding:1rem 2rem; cursor:pointer; }
+
+.toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:var(--bg2); border:1px solid var(--gold); padding:1rem 2rem; color:var(--gold); z-index:9999; border-radius:4px; opacity:0; transition:all 0.4s; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(-10px); }
 </style>
 </head>
 <body>
-<!-- မူရင်း HTML structure အားလုံး ထားထားတယ်၊ အောက်ပါ အပိုင်းတွေ ထည့်ထားတယ် -->
 
-<!-- ဥပမာ: Sort ထည့်ထားတဲ့ နေရာ (search အောက်မှာ) -->
-<div class="search-wrap">
-  <span class="search-label">Search</span>
-  <input type="text" class="search-input" id="searchInput" placeholder="Title, author, or genre...">
-  <select class="sort-select" id="sortSelect">
-    <option value="recent">Recently Added</option>
-    <option value="title">Title A-Z</option>
-    <option value="author">Author A-Z</option>
-    <option value="year">Year (Newest)</option>
-    <option value="pages">Pages (High to Low)</option>
-  </select>
-</div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
 
-<!-- ကျန်တဲ့ မူရင်း sections အားလုံး ... -->
+<header>
+  <a href="#" class="logo">MDL <span>Bibliotheca</span></a>
+  <nav>
+    <a href="#collection">Collection</a>
+    <a href="#featured">Featured</a>
+    <a href="#" id="exportBtn">Export</a>
+    <a href="#" id="importBtn">Import</a>
+  </nav>
+</header>
 
-<!-- Modal ကို ချဲ့ထားတယ် (Edit mode ပါလာတယ်) -->
+<!-- HERO section (မူရင်း ထားထားတယ်) -->
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="hero-eyebrow">My Digital Library</div>
+    <h1 class="hero-title">A Library<br><em>is not</em><br>a church.</h1>
+    <p class="hero-sub">Every book is a door to another world.</p>
+    <div class="hero-actions">
+      <a href="#collection" class="btn-primary">Browse Collection</a>
+      <button class="btn-secondary" id="openAddModal">Add New Book</button>
+    </div>
+  </div>
+</section>
+
+<!-- Collection Section -->
+<section id="collection">
+  <div class="section-header">
+    <h2>The Library</h2>
+    <button id="openAddModal2">+ Add Book</button>
+  </div>
+
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search title, author, genre...">
+    <select id="sortSelect">
+      <option value="recent">Recently Added</option>
+      <option value="title">Title A-Z</option>
+      <option value="author">Author A-Z</option>
+      <option value="year">Year (Newest)</option>
+      <option value="pages">Pages (High-Low)</option>
+    </select>
+  </div>
+
+  <div class="books-grid" id="booksGrid"></div>
+</section>
+
+<!-- Add/Edit Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-title" id="modalTitle">Add a Book</div>
-    <!-- form fields + new ones: cover upload, rating, progress -->
+    <h2 id="modalTitle">Add a Book</h2>
+    
+    <input type="text" id="fTitle" class="form-input" placeholder="Book Title *">
+    <input type="text" id="fAuthor" class="form-input" placeholder="Author *">
+    
+    <select id="fGenre" class="form-select">
+      <option value="">Select Genre</option>
+      <option>Fiction</option><option>Science Fiction</option><option>Fantasy</option>
+      <option>Mystery</option><option>Non-Fiction</option><option>Philosophy</option>
+      <option>Biography</option><option>History</option><option>Other</option>
+    </select>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <input type="number" id="fYear" class="form-input" placeholder="Year">
+      <input type="number" id="fPages" class="form-input" placeholder="Pages">
+    </div>
+
+    <textarea id="fDesc" class="form-textarea" placeholder="Description / Notes"></textarea>
+
+    <label>Rating</label>
+    <div id="starRating" class="star-rating"></div>
+
+    <label>Reading Progress (%)</label>
+    <input type="range" id="fProgress" min="0" max="100" value="0" style="width:100%;">
+
+    <label>Cover Image (optional)</label>
     <input type="file" id="coverUpload" accept="image/*">
-    <div id="coverPreview" style="margin:10px 0; max-height:180px; display:none;"></div>
-    <!-- Rating & Progress inputs -->
-    <button id="saveBook">Save Book</button>
+    <div id="coverPreview" style="margin:10px 0;max-height:220px;display:none;overflow:hidden;"></div>
+
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:flex-end;">
+      <button class="btn-secondary" id="closeModal">Cancel</button>
+      <button class="btn-primary" id="saveBook">Save Book</button>
+    </div>
   </div>
 </div>
 
-<script>
-// အသစ်ပြင်ထားတဲ့ JavaScript (အဓိက ပြောင်းလဲထားတဲ့ အပိုင်း)
-let books = JSON.parse(localStorage.getItem('mdl_books') || '[]');
+<div class="toast" id="toast"></div>
 
-// Sample books (ပထမ ဖွင့်ရင် ချက်ချင်း ကြည့်ကောင်းအောင်)
+<script>
+// ==================== DATA & VARIABLES ====================
+let books = JSON.parse(localStorage.getItem('mdl_books') || '[]');
+let currentEditId = null;
+let currentRating = 0;
+
+// Sample Books (ပထမ ဖွင့်ရင် ချက်ချင်း ကောင်းအောင်)
 if (books.length === 0) {
-  books = [ /* 5-6 အုပ် sample books ထည့်ထားတယ် (The Secret History, Dune, etc.) */ ];
+  books = [
+    {id:1, title:"Dune", author:"Frank Herbert", genre:"Science Fiction", year:"1965", pages:"412", desc:"A desert planet, a messianic leader, and the most valuable substance in the universe.", color:"navy", rating:5, progress:100, cover:null, added:"2026-04-01"},
+    {id:2, title:"The Secret History", author:"Donna Tartt", genre:"Fiction", year:"1992", pages:"559", desc:"A group of classics students and a murder.", color:"green", rating:4, progress:65, cover:null, added:"2026-04-05"},
+    {id:3, title:"1984", author:"George Orwell", genre:"Fiction", year:"1949", pages:"328", desc:"Big Brother is watching you.", color:"red", rating:5, progress:100, cover:null, added:"2026-04-10"},
+    {id:4, title:"Pride and Prejudice", author:"Jane Austen", genre:"Fiction", year:"1813", pages:"279", desc:"It is a truth universally acknowledged...", color:"gold", rating:4, progress:30, cover:null, added:"2026-04-12"},
+    {id:5, title:"The Name of the Wind", author:"Patrick Rothfuss", genre:"Fantasy", year:"2007", pages:"662", desc:"The story of Kvothe.", color:"purple", rating:5, progress:45, cover:null, added:"2026-04-14"},
+    {id:6, title:"Sapiens", author:"Yuval Noah Harari", genre:"Non-Fiction", year:"2011", pages:"443", desc:"A brief history of humankind.", color:"blue", rating:4, progress:80, cover:null, added:"2026-04-15"}
+  ];
   localStorage.setItem('mdl_books', JSON.stringify(books));
 }
 
-let currentEditId = null;
-let selectedColor = 'green';
+// Colors
+const COLORS = {
+  green: 'linear-gradient(135deg,#1e3a2f,#2a6041)',
+  red: 'linear-gradient(135deg,#3d1f1f,#8b2020)',
+  navy: 'linear-gradient(135deg,#1a1a2e,#16213e)',
+  gold: 'linear-gradient(135deg,#2e2a00,#5c5400)',
+  purple: 'linear-gradient(135deg,#1a0030,#3d0070)',
+  blue: 'linear-gradient(135deg,#001a2e,#002e5c)'
+};
 
-// Render, Save, Edit, Delete, Sort, Image Upload စသဖြင့် function အားလုံး အသစ်ရေးထားတယ်
-function renderBooks() { /* ပိုရှုပ်ထွေးအောင် မဖြစ်အောင် ပြင်ထားတယ် */ }
-function saveBook() { /* add or edit */ }
-function editBook(id) { /* modal ဖွင့်ပြီး pre-fill */ }
-function deleteBook(id) { /* ... */ }
+// ==================== HELPER FUNCTIONS ====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
 
-// Export & Import
-function exportLibrary() {
+function saveToStorage() {
+  localStorage.setItem('mdl_books', JSON.stringify(books));
+}
+
+// ==================== RENDER BOOKS ====================
+function renderBooks() {
+  const grid = document.getElementById('booksGrid');
+  let filtered = [...books];
+
+  // Search
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (query) {
+    filtered = filtered.filter(b => 
+      b.title.toLowerCase().includes(query) || 
+      b.author.toLowerCase().includes(query) ||
+      b.genre.toLowerCase().includes(query)
+    );
+  }
+
+  // Sort
+  const sortMode = document.getElementById('sortSelect').value;
+  if (sortMode === 'title') filtered.sort((a,b) => a.title.localeCompare(b.title));
+  else if (sortMode === 'author') filtered.sort((a,b) => a.author.localeCompare(b.author));
+  else if (sortMode === 'year') filtered.sort((a,b) => parseInt(b.year) - parseInt(a.year));
+  else if (sortMode === 'pages') filtered.sort((a,b) => parseInt(b.pages||0) - parseInt(a.pages||0));
+  else filtered.sort((a,b) => new Date(b.added) - new Date(a.added)); // recent
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:6rem;text-align:center;color:var(--ink3);">No books found.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(book => `
+    <div class="book-card">
+      <div class="book-card-cover" style="background:${COLORS[book.color]||COLORS.green}">
+        ${book.cover ? `<img src="${book.cover}" alt="${book.title}">` : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);font-size:0.9rem;text-align:center;padding:1rem;">${book.title}</div>`}
+      </div>
+      <div style="margin:1rem 0 0.5rem;">
+        <strong>${book.title}</strong><br>
+        <small style="color:var(--ink2);">by ${book.author}</small>
+      </div>
+      <small>${book.genre} • ${book.year} • ${book.pages ? book.pages+'p' : ''}</small>
+      
+      <div style="margin:12px 0;">
+        ${Array(5).fill(0).map((_,i) => `<span class="star ${i < (book.rating||0) ? 'filled' : ''}">★</span>`).join('')}
+      </div>
+      
+      <div style="height:6px;background:#222;margin:8px 0;border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${book.progress||0}%;background:var(--gold);"></div>
+      </div>
+      
+      <div style="display:flex;gap:10px;margin-top:1rem;">
+        <button onclick="editBook(${book.id})" style="flex:1;background:rgba(201,168,76,0.1);border:1px solid var(--gold);color:var(--gold);">Edit</button>
+        <button onclick="deleteBook(${book.id})" style="flex:1;background:transparent;border:1px solid #600;color:#c66;">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== ADD / EDIT ====================
+function openModal(isEdit = false, book = null) {
+  currentEditId = isEdit && book ? book.id : null;
+  document.getElementById('modalTitle').textContent = isEdit ? "Edit Book" : "Add New Book";
+  
+  document.getElementById('fTitle').value = book ? book.title : '';
+  document.getElementById('fAuthor').value = book ? book.author : '';
+  document.getElementById('fGenre').value = book ? book.genre : '';
+  document.getElementById('fYear').value = book ? book.year : '';
+  document.getElementById('fPages').value = book ? book.pages : '';
+  document.getElementById('fDesc').value = book ? book.desc : '';
+  document.getElementById('fProgress').value = book ? (book.progress || 0) : 0;
+
+  currentRating = book ? (book.rating || 0) : 3;
+  renderStars();
+
+  // Cover preview
+  const preview = document.getElementById('coverPreview');
+  if (book && book.cover) {
+    preview.innerHTML = `<img src="${book.cover}" style="max-height:200px;width:auto;">`;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function renderStars() {
+  const container = document.getElementById('starRating');
+  container.innerHTML = Array(5).fill(0).map((_,i) => 
+    `<span class="star ${i < currentRating ? 'filled' : ''}" onclick="setRating(${i+1})">★</span>`
+  ).join('');
+}
+
+window.setRating = function(r) {
+  currentRating = r;
+  renderStars();
+};
+
+document.getElementById('saveBook').addEventListener('click', () => {
+  const title = document.getElementById('fTitle').value.trim();
+  const author = document.getElementById('fAuthor').value.trim();
+  
+  if (!title || !author) {
+    showToast("Title and Author are required!");
+    return;
+  }
+
+  const newBook = {
+    id: currentEditId || Date.now(),
+    title,
+    author,
+    genre: document.getElementById('fGenre').value || 'Uncategorized',
+    year: document.getElementById('fYear').value || '—',
+    pages: document.getElementById('fPages').value || '—',
+    desc: document.getElementById('fDesc').value.trim() || 'No description.',
+    color: 'green', // လိုချင်ရင် color picker ထပ်ထည့်နိုင်တယ်
+    rating: currentRating,
+    progress: parseInt(document.getElementById('fProgress').value),
+    added: new Date().toISOString().slice(0,10)
+  };
+
+  // Cover image handling
+  const fileInput = document.getElementById('coverUpload');
+  if (fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      newBook.cover = e.target.result;
+      finishSave(newBook);
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    if (currentEditId) {
+      const oldBook = books.find(b => b.id === currentEditId);
+      newBook.cover = oldBook ? oldBook.cover : null;
+    }
+    finishSave(newBook);
+  }
+});
+
+function finishSave(newBook) {
+  if (currentEditId) {
+    books = books.map(b => b.id === currentEditId ? newBook : b);
+    showToast("Book updated successfully ✓");
+  } else {
+    books.unshift(newBook);
+    showToast(`"${newBook.title}" added to library ✓`);
+  }
+  
+  saveToStorage();
+  renderBooks();
+  document.getElementById('modalOverlay').style.display = 'none';
+  currentEditId = null;
+}
+
+// Delete
+window.deleteBook = function(id) {
+  if (confirm("Delete this book?")) {
+    books = books.filter(b => b.id !== id);
+    saveToStorage();
+    renderBooks();
+    showToast("Book removed.");
+  }
+};
+
+// Edit
+window.editBook = function(id) {
+  const book = books.find(b => b.id === id);
+  if (book) openModal(true, book);
+};
+
+// ==================== EVENT LISTENERS ====================
+document.getElementById('openAddModal').addEventListener('click', () => openModal(false));
+document.getElementById('openAddModal2').addEventListener('click', () => openModal(false));
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('modalOverlay').style.display = 'none';
+});
+
+document.getElementById('searchInput').addEventListener('input', renderBooks);
+document.getElementById('sortSelect').addEventListener('change', renderBooks);
+
+// Export
+document.getElementById('exportBtn').addEventListener('click', (e) => {
+  e.preventDefault();
   const dataStr = JSON.stringify(books, null, 2);
   const blob = new Blob([dataStr], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'my-digital-library.json'; a.click();
+  a.href = url;
+  a.download = 'my-digital-library-backup.json';
+  a.click();
+  showToast("Library exported!");
+});
+
+// Import (simple version)
+document.getElementById('importBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(ev) {
+    const file = ev.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (Array.isArray(imported)) {
+          books = imported;
+          saveToStorage();
+          renderBooks();
+          showToast("Library imported successfully!");
+        }
+      } catch(err) {
+        showToast("Invalid JSON file.");
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
+// Cursor (desktop only)
+if (window.innerWidth > 768) {
+  const cursor = document.getElementById('cursor');
+  const cursorDot = document.getElementById('cursorDot');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    cursorDot.style.left = e.clientX + 'px';
+    cursorDot.style.top = e.clientY + 'px';
+  });
 }
 
-// Init + Event Listeners
-// အားလုံး ချောချောမောမော အလုပ်လုပ်အောင် ပြင်ထားတယ်
+// Init
+renderBooks();
+showToast("Welcome to your Digital Library 📚");
 </script>
 </body>
 </html>
